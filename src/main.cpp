@@ -6,40 +6,54 @@ int main()
 {
     float value{0.f};
 
+    // ... (vos includes restent les mêmes)
+
     quick_imgui::loop(
         "Chess",
         {
             .init = [&]() {},
-            .loop =
-                [&]() {
-                    ImGui::ShowDemoWindow(); // This opens a window which shows tons of examples of what you can do with ImGui. You should check it out! Also, you can use the "Item Picker" in the top menu of that demo window: then click on any widget and it will show you the corresponding code directly in your IDE!
+            .loop = [&]() {
+            ImGui::Begin("Chess Board");
 
-                    ImGui::Begin("Example");
+            // {R, G, B, A}
+            ImVec4 color1 = ImVec4{1.0f, 0.8f, 0.25f, 0.8f};
+            ImVec4 color2   = ImVec4{0.25f, 0.8f, 1.0f, 0.8f};
+            float size = 50.0f; // Taille d'une case
 
-                    ImGui::SliderFloat("My Value", &value, 0.f, 3.f);
+            // ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 0});
 
-                    if (ImGui::Button("1", ImVec2{50.f, 50.f}))
-                        std::cout << "Clicked button 1\n";
-                    ImGui::SameLine(); // Draw the next ImGui widget on the same line as the previous one. Otherwise it would be below it
+            for (int row = 0; row < 8; row++) {
+                for (int col = 0; col < 8; col++) {
+                    
+                    // Logique du damier : si (ligne + colonne) est pair, couleur A, sinon couleur B
+                    bool is1 = (row + col) % 2 == 0;
+                    ImVec4 currentColor = is1 ? color1 : color2;
 
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{1.f, 0.f, 0.f, 1.f}); // Changes the color of all buttons until we call ImGui::PopStyleColor(). There is also ImGuiCol_ButtonActive and ImGuiCol_ButtonHovered
+                    // On change la couleur du bouton
+                    ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
+                    
+                    // On génère un ID unique pour chaque case basé sur sa position
+                    ImGui::PushID(row * 8 + col); 
+                    
+                    if (ImGui::Button(" ", ImVec2{size, size})) {
+                        std::cout << "Case cliquee : " << row << ", " << col << "\n";
+                    }
 
-                    ImGui::PushID(2); // When some ImGui items have the same label (for exemple the next two buttons are labeled "Yo") ImGui needs you to specify an ID so that it can distinguish them. It can be an int, a pointer, a string, etc.
-                                      // You will definitely run into this when you create a button for each of your chess pieces, so remember to give them an ID!
-                    if (ImGui::Button("Yo", ImVec2{50.f, 50.f}))
-                        std::cout << "Clicked button 2\n";
-                    ImGui::PopID(); // Then pop the id you pushed after you created the widget
-
-                    ImGui::SameLine();
-                    ImGui::PushID(3);
-                    if (ImGui::Button("Yo", ImVec2{50.f, 50.f}))
-                        std::cout << "Clicked button 3\n";
                     ImGui::PopID();
-
                     ImGui::PopStyleColor();
+                    // ImGui::PopStyleVar();
 
-                    ImGui::End();
-                },
+                    // Si ce n'est pas la dernière colonne, on reste sur la même ligne
+                    if (col < 7) {
+                        ImGui::SameLine(0, 0); // 0, 0 pour coller les cases entre elles
+                    }
+                }
+                // À la fin de chaque ligne, ImGui passe automatiquement à la ligne suivante
+            }
+
+            ImGui::End(); },
         }
     );
+
+    return 0;
 }
