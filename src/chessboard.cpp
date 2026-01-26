@@ -1,27 +1,55 @@
 #include "chessboard.hpp"
+#include <imgui.h>
 
 void drawchessboard()
 {
     // {R, G, B, A}
     ImVec4 color1 = ImVec4{1.0f, 0.8f, 0.25f, 0.8f};
     ImVec4 color2 = ImVec4{0.25f, 0.8f, 1.0f, 0.8f};
-    float  size   = 50.0f; // Taille d'une case
+    float  size   = 50.0f;
 
     for (int row = 0; row < 8; row++)
     {
         for (int col = 0; col < 8; col++)
         {
-            // Si (ligne + colonne) pair, couleur A, sinon couleur B
+            // Couleurs chessboard
             bool   is1          = (row + col) % 2 == 0;
             ImVec4 currentColor = is1 ? color1 : color2;
-
-            // Couleur du bouton
             ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
 
-            // ID unique pour chaque case 
-            ImGui::PushID(row * 8 + col);
+            // ID
+            int index = row * 8 + col;
+            ImGui::PushID(index);
 
-            if (ImGui::Button(" ", ImVec2{size, size}))
+            const char* label = " ";
+            if (index >= 8 && index <= 15 || index >= 48 && index <= 55)
+            {
+                label = "P";
+            }
+            else if (index == 0 || index == 7 || index == 56 || index == 63)
+            {
+                label = "T";
+            }
+            else if (index == 1 || index == 6 || index == 57 || index == 62)
+            {
+                label = "C";
+            }
+            else if (index == 2 || index == 5 || index == 58 || index == 61)
+            {
+                label = "F";
+            }
+            else if (index == 3 || index == 59)
+            {
+                label = "D";
+            }
+            else if (index == 4 || index == 60)
+            {
+                label = "R";
+            }            
+
+
+
+            if (ImGui::Button(label, ImVec2{size, size}))
             {
                 std::cout << "Case cliquee : " << row << ", " << col << "\n";
             }
