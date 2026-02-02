@@ -1,11 +1,10 @@
 #include "chessboard.hpp"
-#include <imgui.h>
 
 void drawchessboard()
 {
     // {R, G, B, A}
-    ImVec4 color1 = ImVec4{1.0f, 0.8f, 0.25f, 0.8f};
-    ImVec4 color2 = ImVec4{0.25f, 0.8f, 1.0f, 0.8f};
+    ImVec4 color1 = ImVec4{0.45f, 0.25f, 0.15f, 1.0f};
+    ImVec4 color2 = ImVec4{0.9f, 0.8f, 0.65f, 1.0f};
     float  size   = 50.0f;
 
     for (int row = 0; row < 8; row++)
@@ -14,14 +13,17 @@ void drawchessboard()
         {
             // Couleurs chessboard
             bool   is1          = (row + col) % 2 == 0;
-            ImVec4 currentColor = is1 ? color1 : color2;
+            ImVec4 currentColor = is1 ? color2 : color1;
             ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
 
             // ID
+            std::array<char, 64> chessboard;
             int index = row * 8 + col;
             ImGui::PushID(index);
 
             const char* label = " ";
+            // getPieceAtPos(index)
+            
             if (index >= 8 && index <= 15 || index >= 48 && index <= 55)
             {
                 label = "P";
