@@ -1,8 +1,14 @@
 #pragma once
-#include <iostream>
-#include <array>
 #include <vector>
-#include <string>
 #include <imgui.h>
 
-void drawchessboard();
+struct ChessState {
+    std::vector<char> boardData;
+    int selectedIndex = -1;
+    std::vector<int> possibleMoves;
+
+    // Constructeur pour initialiser le plateau
+    ChessState();
+};
+
+void drawchessboard(ChessState& state);

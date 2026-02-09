@@ -1,6 +1,6 @@
 #include <imgui.h>
-#include "quick_imgui/quick_imgui.hpp"
 #include "chessboard.hpp"
+#include "quick_imgui/quick_imgui.hpp"
 
 int main()
 {
@@ -13,7 +13,8 @@ int main()
             .loop = [&]() {
             ImGui::Begin("Chess Board");
 
-            drawchessboard();
+            static ChessState state; 
+            drawchessboard(state);
 
             ImGui::End(); },
         }
