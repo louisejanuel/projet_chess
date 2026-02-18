@@ -1,14 +1,28 @@
 #pragma once
+#include <array>
+#include <memory>
 #include <vector>
-#include <imgui.h>
+#include "Pieces/Piece.hpp"
+#include "Utils.hpp"
 
-struct ChessState {
-    std::vector<char> boardData;
-    int selectedIndex = -1;
-    std::vector<int> possibleMoves;
+class Chessboard {
+private:
+    std::array<std::unique_ptr<Piece>, 64> m_pieces;
+    Color m_current_turn;
 
-    // Constructeur pour initialiser le plateau
-    ChessState();
+public:
+    Chessboard();
+
+    Color get_current_turn() const { return m_current_turn; }
+
+    Piece* get_piece(int index) const {
+        if (index < 0 || index >= 64) return nullptr;
+        return m_pieces[index].get();
+    }
+
+    bool move_piece(int fromIdx, int toIdx);
+    
+    bool is_empty(int index) const {
+        return m_pieces[index] == nullptr;
+    }
 };
-
-void drawchessboard(ChessState& state);

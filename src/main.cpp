@@ -1,24 +1,21 @@
-#include <imgui.h>
-#include "chessboard.hpp"
+#include "Chessboard.hpp"
+#include "View/GameRender.hpp"
 #include "quick_imgui/quick_imgui.hpp"
 
 int main()
 {
-    float value{0.f};
-
     quick_imgui::loop(
-        "Chess",
+        "Chess Game",
         {
             .init = [&]() {},
             .loop = [&]() {
-            ImGui::Begin("Chess Board");
-
-            static ChessState state; 
-            drawchessboard(state);
-
-            ImGui::End(); },
+                static Chessboard chessboard; 
+                
+                static GameRender game_render; 
+                
+                game_render.render(chessboard);
+            },
         }
     );
-
     return 0;
 }
