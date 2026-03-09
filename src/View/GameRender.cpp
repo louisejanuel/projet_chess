@@ -65,10 +65,32 @@ void GameRender::render(Chessboard& chessboard) {
             if (x < 7) ImGui::SameLine();
         }
     }
+
+    // affichage victoire
+    GameState state = chessboard.get_state();
+    
+    if (state != GameState::Playing) {
+        // On saute une ligne pour aérer
+        ImGui::Spacing(); 
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        if (state == GameState::WhiteWins) {
+            // Un joli texte vert pour la victoire
+            ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "VICTOIRE : Les blancs ont gagne !");
+        } 
+        else if (state == GameState::BlackWins) {
+            ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "VICTOIRE : Les noirs ont gagne !");
+        }
+    }
+
     ImGui::End();
 }
 
 void GameRender::handle_click(Chessboard& chessboard, int index) {
+    if (chessboard.get_state() != GameState::Playing) {
+        return;
+    }
     //click handling logic
     if (is_highlighted(index)) {
         chessboard.move_piece(m_selected_index, index);

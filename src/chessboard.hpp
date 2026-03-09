@@ -9,11 +9,13 @@ class Chessboard {
 private:
     std::array<std::unique_ptr<Piece>, 64> m_pieces;
     Color m_current_turn;
+    GameState m_state = GameState::Playing;
 
 public:
     Chessboard();
 
     Color get_current_turn() const { return m_current_turn; }
+    GameState get_state() const { return m_state; }
 
     Piece* get_piece(int index) const {
         if (index < 0 || index >= 64) return nullptr;

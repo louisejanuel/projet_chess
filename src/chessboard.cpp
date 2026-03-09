@@ -70,6 +70,19 @@ bool Chessboard::move_piece(int fromIdx, int toIdx)
         p->set_moved(true);
     }
 
+    //check victory condition
+    if (!is_empty(toIdx)) {
+        Piece* target = get_piece(toIdx);
+        if (target->get_type() == Type::King) {
+            // Si on mange le roi blanc, les noirs gagnent, et inversement
+            if (target->get_color() == Color::White) {
+                m_state = GameState::BlackWins;
+            } else {
+                m_state = GameState::WhiteWins;
+            }
+        }
+    }
+
     // move the unique_ptr
     m_pieces[toIdx] = std::move(m_pieces[fromIdx]);
 

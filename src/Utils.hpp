@@ -3,6 +3,11 @@
 
 enum class Color { None, White, Black };
 enum class Type { None, Pawn, Rook, Knight, Bishop, Queen, King };
+enum class GameState {
+    Playing,
+    WhiteWins,
+    BlackWins
+};
 
 struct Position {
     int x, y;
