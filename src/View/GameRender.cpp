@@ -48,11 +48,11 @@ void GameRender::render(Chessboard& chessboard) {
                 else if (p->get_type() == Type::Queen) label = "Q";
                 else if (p->get_type() == Type::Rook) label = "R";
                 else if (p->get_type() == Type::Bishop) label = "B";
-                else if (p->get_type() == Type::Knight) label = "N";
+                else if (p->get_type() == Type::Knight) label = "Kn";
                 
                 label += (p->get_color() == Color::White) ? " (W)" : " (B)";
             }
-
+            
             //interaction
             if (ImGui::Button(label.c_str(), ImVec2{size, size})) {
                 handle_click(chessboard, index);
@@ -69,7 +69,7 @@ void GameRender::render(Chessboard& chessboard) {
 }
 
 void GameRender::handle_click(Chessboard& chessboard, int index) {
-    //case 1 : click handling logic
+    //click handling logic
     if (is_highlighted(index)) {
         chessboard.move_piece(m_selected_index, index);
         
@@ -79,14 +79,15 @@ void GameRender::handle_click(Chessboard& chessboard, int index) {
         return;
     }
 
-    //case 2 : select piece
+    //select piece
     Piece* p = chessboard.get_piece(index);
     if (p != nullptr) {
-        // TODO : Vérifier ici si c'est au tour de cette couleur de jouer
         m_selected_index = index;
-        m_possible_moves = p->get_available_moves(chessboard, index);
+
+        Position currentPos = { index % 8, index / 8 };
+        m_possible_moves = p->get_available_moves(chessboard, currentPos);
     } 
-    //case 3 : deselect piece (click on another square)
+    //deselect piece (click on another square)
     else {
         m_selected_index = -1;
         m_possible_moves.clear();
@@ -94,9 +95,8 @@ void GameRender::handle_click(Chessboard& chessboard, int index) {
 }
 
 bool GameRender::is_highlighted(int index) const {
-    //index is highlighted if it's in the possible moves list
-    for (int move : m_possible_moves) {
-        if (move == index) return true;
+    for (const Move& move : m_possible_moves) {
+        if (move.end.to_index() == index) return true;
     }
     return false;
 }

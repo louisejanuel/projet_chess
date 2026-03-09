@@ -19,5 +19,5 @@ public:
     bool has_moved() const { return m_has_moved; }
     void set_moved(bool moved) { m_has_moved = moved; }
 
-    virtual std::vector<int> get_available_moves(const Chessboard& board, int currentIdx) const = 0;
+    virtual std::vector<Move> get_available_moves(const Chessboard& board, Position currentPos) const = 0;
 };

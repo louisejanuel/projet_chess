@@ -1,51 +1,41 @@
 #include "Pawn.hpp"
 #include "../Chessboard.hpp"
 
-std::vector<int> Pawn::get_available_moves(const Chessboard& chessboard, int currentIdx) const {
-    std::vector<int> moves;
+std::vector<Move> Pawn::get_available_moves(const Chessboard& chessboard, Position currentPos) const {
+    std::vector<Move> moves;
     
-    int y = currentIdx / 8;
-    int x = currentIdx % 8;
+    int direction = (m_color == Color::White) ? -1 : 1; //
 
-    int direction = (m_color == Color::White) ? -1 : 1; 
-
-    //move one square forward
-    int nextY = y + direction;
-    int nextIdx = nextY * 8 + x;
+    //move forward one square
+    Position nextPos = { currentPos.x, currentPos.y + direction };
     
-    if (nextY >= 0 && nextY < 8 && chessboard.is_empty(nextIdx)) {
-        moves.push_back(nextIdx);
+    if (nextPos.is_valid() && chessboard.is_empty(nextPos.to_index())) {
+        moves.push_back({currentPos, nextPos});
 
-        //if first move, can move two squares
-        if (!m_has_moved) {
-            int doubleY = y + (2 * direction);
-            int doubleIdx = doubleY * 8 + x;
-            if (doubleY >= 0 && doubleY < 8 && chessboard.is_empty(doubleIdx)) {
-                moves.push_back(doubleIdx);
+        //move forward two squares if first move
+        if (!m_has_moved) { //
+            Position doublePos = { currentPos.x, currentPos.y + (2 * direction) };
+            if (doublePos.is_valid() && chessboard.is_empty(doublePos.to_index())) {
+                moves.push_back({currentPos, doublePos});
             }
         }
     }
 
-    //eating moves
-    //left diagonal
-    int captureLeftX = x - 1;
-    if (captureLeftX >= 0) {
-        int captureLeftIdx = nextY * 8 + captureLeftX;
-        Piece* target = chessboard.get_piece(captureLeftIdx);
-    
-        if (target != nullptr && target->get_color() != this->m_color) {
-            moves.push_back(captureLeftIdx);
+    //eat diagonally left
+    Position captureLeft = { currentPos.x - 1, currentPos.y + direction };
+    if (captureLeft.is_valid()) {
+        Piece* target = chessboard.get_piece(captureLeft.to_index());
+        if (target != nullptr && target->get_color() != this->m_color) { //
+            moves.push_back({currentPos, captureLeft});
         }
     }
 
-    //right diagonal
-    int captureRightX = x + 1;
-    if (captureRightX <= 7) {
-        int captureRightIdx = nextY * 8 + captureRightX;
-        Piece* target = chessboard.get_piece(captureRightIdx);
-
-        if (target != nullptr && target->get_color() != this->m_color) {
-            moves.push_back(captureRightIdx);
+    //eat diagonally right
+    Position captureRight = { currentPos.x + 1, currentPos.y + direction };
+    if (captureRight.is_valid()) {
+        Piece* target = chessboard.get_piece(captureRight.to_index());
+        if (target != nullptr && target->get_color() != this->m_color) { //
+            moves.push_back({currentPos, captureRight});
         }
     }
 
