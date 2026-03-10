@@ -10,6 +10,11 @@ void GameRender::render(Chessboard& chessboard)
 
     ImGui::Begin("ChessBoard");
 
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+        m_selected_index = -1;
+        m_possible_moves.clear();
+    }
+
     Piece* selected_piece = chessboard.get_piece(m_selected_index);
 
     for (int y = 0; y < 8; y++)
