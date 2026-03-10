@@ -65,11 +65,6 @@ bool Chessboard::move_piece(int fromIdx, int toIdx)
         return false;
     }
 
-    // mark the piece as moved
-    if (p) {
-        p->set_moved(true);
-    }
-
     //check victory condition
     if (!is_empty(toIdx)) {
         Piece* target = get_piece(toIdx);
@@ -85,6 +80,11 @@ bool Chessboard::move_piece(int fromIdx, int toIdx)
 
     // move the unique_ptr
     m_pieces[toIdx] = std::move(m_pieces[fromIdx]);
+
+    // mark as moved
+    if (m_pieces[toIdx]) {
+        m_pieces[toIdx]->set_moved(true);
+    }
 
     //change turn
     m_current_turn = (m_current_turn == Color::White) ? Color::Black : Color::White;
