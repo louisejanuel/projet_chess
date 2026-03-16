@@ -22,14 +22,14 @@ int main() {
             .init = [&]() {
                 // Initialisation 3D
                 chessBoard3D.init(); 
-                shader = new Shader("../../src/Shaders/board.vs", "../../src/Shaders/board.fs"); 
+                shader = new Shader("src/Shaders/board.vs", "src/Shaders/board.fs"); 
                 
                 // Initialisation de la police
                 ImGuiIO& io = ImGui::GetIO();
                 io.Fonts->AddFontDefault();
                 static const ImWchar ranges[] = { 0x0020, 0x00FF, 0x2650, 0x265F, 0 };
                 
-                const char *fontPath = "../../src/Assets/DejaVuSans.ttf";
+                const char *fontPath = "src/Assets/DejaVuSans.ttf";
                 std::ifstream fileCheck(fontPath);
                 if (fileCheck.good()) {
                     chess_font = io.Fonts->AddFontFromFileTTF(fontPath, 75.0f, nullptr, ranges);
