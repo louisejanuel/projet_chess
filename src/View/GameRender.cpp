@@ -15,6 +15,12 @@ void GameRender::render(Chessboard& chessboard)
 
     draw_board(chessboard);
 
+    // affichage popup de promotion
+    if (m_awaiting_promotion) {
+        ImGui::OpenPopup("Choix Promotion");
+    }
+    draw_promotion_popup(chessboard);
+
     // affichage victoire
     GameState state = chessboard.get_state();
 
@@ -126,14 +132,32 @@ void GameRender::handle_click(Chessboard& chessboard, int index)
     {
         return;
     }
+
     // click handling logic
     if (is_highlighted(index))
     {
-        chessboard.move_piece(m_selected_index, index);
+        Piece* p = chessboard.get_piece(m_selected_index);
+        bool is_promotion = false;
 
-        // reset selection after move
-        m_selected_index = -1;
-        m_possible_moves.clear();
+        // Si c'est un pion qui arrive sur la ligne 0 ou 7
+        if (p != nullptr && p->get_type() == Type::Pawn) {
+            int target_y = index / 8;
+            if (target_y == 0 || target_y == 7) {
+                is_promotion = true;
+            }
+        }
+
+        // Si promotion, on gèle le jeu et on prépare la popup
+        if (is_promotion) {
+            m_awaiting_promotion = true;
+            m_pending_promotion_move = { {m_selected_index % 8, m_selected_index / 8}, {index % 8, index / 8}, Type::None };
+        } 
+        // Sinon, mouvement normal
+        else {
+            chessboard.move_piece(m_selected_index, index);
+            m_selected_index = -1;
+            m_possible_moves.clear();
+        }
         return;
     }
 
@@ -162,4 +186,43 @@ bool GameRender::is_highlighted(int index) const
             return true;
     }
     return false;
+}
+
+
+void GameRender::draw_promotion_popup(Chessboard& chessboard) 
+{
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    if (ImGui::BeginPopupModal("Choix Promotion", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("En quoi voulez-vous transformer votre pion ?");
+        ImGui::Separator();
+
+
+        auto select_piece = [&](Type type, const char* label) {
+            if (ImGui::Button(label, ImVec2(120, 0))) {
+                chessboard.move_piece(m_pending_promotion_move.start.to_index(), m_pending_promotion_move.end.to_index(), type);
+
+                m_selected_index = -1;
+                m_possible_moves.clear();
+                m_awaiting_promotion = false;
+                
+                ImGui::CloseCurrentPopup();
+            }
+        };
+
+        select_piece(Type::Queen, "Reine");
+        select_piece(Type::Rook, "Tour");
+        select_piece(Type::Bishop, "Fou");
+        select_piece(Type::Knight, "Cavalier");
+
+        ImGui::Separator();
+
+        if (ImGui::Button("Annuler", ImVec2(120, 0))) {
+            m_awaiting_promotion = false;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
 }
