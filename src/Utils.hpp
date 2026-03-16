@@ -26,4 +26,6 @@ struct Move {
     
     // bool is_capture = false;
     // bool is_castling = false;
+
+    Type promotion = Type::None;
 };

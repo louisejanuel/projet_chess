@@ -52,41 +52,43 @@ Chessboard::Chessboard() : m_current_turn(Color::White) {
     m_pieces[60] = std::make_unique<King>(Color::White);
 }
 
-bool Chessboard::move_piece(int fromIdx, int toIdx)
+
+bool Chessboard::move_piece(int fromIdx, int toIdx, Type promotion)
 {
     if (fromIdx < 0 || fromIdx >= 64 || toIdx < 0 || toIdx >= 64) return false;
-    
-    // cannot move from an empty square
     if (is_empty(fromIdx)) return false;
 
     Piece* p = get_piece(fromIdx);
-    // cannot move opponent's piece
     if (p->get_color() != m_current_turn) {
         return false;
     }
 
-    //check victory condition
+
     if (!is_empty(toIdx)) {
         Piece* target = get_piece(toIdx);
         if (target->get_type() == Type::King) {
-            // Si on mange le roi blanc, les noirs gagnent, et inversement
-            if (target->get_color() == Color::White) {
-                m_state = GameState::BlackWins;
-            } else {
-                m_state = GameState::WhiteWins;
-            }
+            if (target->get_color() == Color::White) m_state = GameState::BlackWins;
+            else m_state = GameState::WhiteWins;
         }
     }
 
-    // move the unique_ptr
+    // Déplacement de la pièce
     m_pieces[toIdx] = std::move(m_pieces[fromIdx]);
-
-    // mark as moved
     if (m_pieces[toIdx]) {
         m_pieces[toIdx]->set_moved(true);
     }
 
-    //change turn
+    //promotion
+    if (promotion != Type::None) {
+        Color c = m_pieces[toIdx]->get_color();
+        // On écrase l'ancien pion par la nouvelle pièce sélectionnée
+        if (promotion == Type::Queen)       m_pieces[toIdx] = std::make_unique<Queen>(c);
+        else if (promotion == Type::Rook)   m_pieces[toIdx] = std::make_unique<Rook>(c);
+        else if (promotion == Type::Bishop) m_pieces[toIdx] = std::make_unique<Bishop>(c);
+        else if (promotion == Type::Knight) m_pieces[toIdx] = std::make_unique<Knight>(c);
+    }
+
+    // Changement de tour
     m_current_turn = (m_current_turn == Color::White) ? Color::Black : Color::White;
 
     return true;

@@ -21,8 +21,8 @@ public:
         if (index < 0 || index >= 64) return nullptr;
         return m_pieces[index].get();
     }
-
-    bool move_piece(int fromIdx, int toIdx);
+    
+    bool move_piece(int fromIdx, int toIdx, Type promotion = Type::None);
     
     bool is_empty(int index) const {
         return m_pieces[index] == nullptr;
