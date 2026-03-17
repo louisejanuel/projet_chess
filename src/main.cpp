@@ -14,7 +14,6 @@ int main()
     GameRender gameRender2D;
     ImFont*    chess_font = nullptr;
 
-    // --- Variables pour le Framebuffer (la toile invisible) ---
     GLuint fbo = 0, textureColorbuffer = 0, rbo = 0;
     int    viewWidth  = 800;
     int    viewHeight = 600;
@@ -23,16 +22,15 @@ int main()
         "Échiquier 2D & 3D - IMAC",
         {.init = [&]() {
              chessBoard3D.init();
-             shader = new Shader("src/Shaders/board.vs", "src/Shaders/board.fs");
+             shader = new Shader("../../src/Shaders/board.vs", "../../src/Shaders/board.fs");
 
              ImGuiIO& io = ImGui::GetIO();
              io.Fonts->AddFontDefault();
              static const ImWchar ranges[] = {0x0020, 0x00FF, 0x2650, 0x265F, 0};
-             const char*          fontPath = "src/Assets/DejaVuSans.ttf";
+             const char*          fontPath = "../../src/Assets/DejaVuSans.ttf";
              std::ifstream        fileCheck(fontPath);
              if (fileCheck.good())
              {
-                 // J'ai réduit la taille de la police à 40 pour que la fenêtre 2D soit moins énorme
                  chess_font = io.Fonts->AddFontFromFileTTF(fontPath, 40.0f, nullptr, ranges);
              }
 
@@ -54,14 +52,14 @@ int main()
              glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, viewWidth, viewHeight);
              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
-             glBindFramebuffer(GL_FRAMEBUFFER, 0); // On remet l'écran par défaut
+             glBindFramebuffer(GL_FRAMEBUFFER, 0); 
          },
 
          .loop = [&]() {
                 // 1. On dit à OpenGL de dessiner DANS notre texture invisible
                 glBindFramebuffer(GL_FRAMEBUFFER, fbo);
                 glViewport(0, 0, viewWidth, viewHeight);
-                glClearColor(0.1f, 0.1f, 0.15f, 1.0f); // Un fond un peu sombre
+                glClearColor(0.1f, 0.1f, 0.15f, 1.0f); 
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glEnable(GL_DEPTH_TEST);
 
