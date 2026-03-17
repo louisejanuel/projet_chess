@@ -5,10 +5,13 @@
 #include "View/GameRender.hpp"
 #include <fstream>
 #include <iostream>
+#include <optional> 
 
 int main() {
     Board chessBoard3D;
-    Shader* shader = nullptr;
+    
+    std::optional<Shader> shader; 
+    
     Chessboard logicBoard;
     GameRender gameRender2D;
     ImFont* chess_font = nullptr;
@@ -23,7 +26,8 @@ int main() {
         {
             .init = [&]() {
                 chessBoard3D.init(); 
-                shader = new Shader("src/Shaders/board.vs", "src/Shaders/board.fs"); 
+                
+                shader.emplace("src/Shaders/board.vs", "src/Shaders/board.fs"); 
                 
                 ImGuiIO& io = ImGui::GetIO();
                 io.Fonts->AddFontDefault();
@@ -58,7 +62,8 @@ int main() {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glEnable(GL_DEPTH_TEST);
 
-                if (shader != nullptr) {
+                // On vérifie si le shader existe avec has_value()
+                if (shader.has_value()) {
                     shader->use();
                     glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 6.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
                     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)viewWidth / (float)viewHeight, 0.1f, 100.0f);
@@ -86,6 +91,5 @@ int main() {
         }
     );
 
-    delete shader;
     return 0;
 }

@@ -18,6 +18,9 @@ public:
         if (VBO != 0)
             glDeleteBuffers(1, &VBO);
     }
+    // On interdit la copie pour éviter les fuites de mémoire OpenGL
+    Model(const Model&)            = delete;
+    Model& operator=(const Model&) = delete;
 
     void setupCube()
     {
