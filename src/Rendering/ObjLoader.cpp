@@ -37,32 +37,34 @@ std::vector<float> ObjLoader::load(const std::string& path) {
             iss >> normal.x >> normal.y >> normal.z;
             temp_normals.push_back(normal);
         } else if (type == "f") {
-            // Lecture des faces (triangles)
-            for (int i = 0; i < 3; ++i) {
-                std::string vertexStr;
-                iss >> vertexStr;
-                
-                // On remplace les '/' par des espaces
+            
+            std::vector<std::vector<float>> faceVertices;
+            std::string vertexStr;
+            
+            while (iss >> vertexStr) {
                 std::replace(vertexStr.begin(), vertexStr.end(), '/', ' ');
                 std::istringstream viss(vertexStr);
                 
                 unsigned int vIdx = 0, uvIdx = 0, nIdx = 0;
                 viss >> vIdx >> uvIdx >> nIdx;
 
-                // En OBJ, les indices commencent à 1, mais en C++ les tableaux commencent à 0 !
                 glm::vec3 vertex = temp_vertices[vIdx - 1];
                 glm::vec2 uv = (uvIdx > 0 && uvIdx <= temp_uvs.size()) ? temp_uvs[uvIdx - 1] : glm::vec2(0.0f);
                 glm::vec3 normal = (nIdx > 0 && nIdx <= temp_normals.size()) ? temp_normals[nIdx - 1] : glm::vec3(0.0f);
 
-                // On aplatit tout ça pour OpenGL (8 floats par sommet)
-                vertexData.push_back(vertex.x);
-                vertexData.push_back(vertex.y);
-                vertexData.push_back(vertex.z);
-                vertexData.push_back(normal.x);
-                vertexData.push_back(normal.y);
-                vertexData.push_back(normal.z);
-                vertexData.push_back(uv.x);
-                vertexData.push_back(uv.y);
+                std::vector<float> vertexProps = {
+                    vertex.x, vertex.y, vertex.z,
+                    normal.x, normal.y, normal.z,
+                    uv.x, uv.y
+                };
+                faceVertices.push_back(vertexProps);
+            }
+
+            // Triangulation, si 3 points triangle,  si 4 points 2 triangles
+            for (size_t i = 1; i < faceVertices.size() - 1; ++i) {
+                vertexData.insert(vertexData.end(), faceVertices[0].begin(), faceVertices[0].end());
+                vertexData.insert(vertexData.end(), faceVertices[i].begin(), faceVertices[i].end());
+                vertexData.insert(vertexData.end(), faceVertices[i+1].begin(), faceVertices[i+1].end());
             }
         }
     }
