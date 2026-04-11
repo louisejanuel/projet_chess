@@ -1,9 +1,9 @@
 #pragma once
-#include "../Rendering/OpenGL.hpp"
-#include "../Rendering/Model.hpp"
-#include "../Rendering/Shader.hpp"
-#include "../Rendering/ObjLoader.hpp"
-#include "../Chessboard.hpp"
+#include "../OpenGL.hpp"
+#include "../Model.hpp"
+#include "../Shader.hpp"
+#include "../ObjLoader.hpp"
+#include "../../Game/Chessboard.hpp"
 
 class Board {
     Model caseVolume;

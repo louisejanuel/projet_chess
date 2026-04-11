@@ -1,4 +1,4 @@
-#include "../Rendering/OpenGL.hpp"
+#include "../OpenGL.hpp"
 
 
 enum class CaseState { Inactive, Hoverable, Selected };
