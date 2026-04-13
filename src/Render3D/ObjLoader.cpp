@@ -3,19 +3,23 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <map>
 #include <glm/glm.hpp>
 
-std::vector<float> ObjLoader::load(const std::string& path) {
-    std::vector<float> vertexData;
+MeshData ObjLoader::load(const std::string& path) {
+    MeshData mesh;
     
     std::vector<glm::vec3> temp_vertices;
     std::vector<glm::vec2> temp_uvs;
     std::vector<glm::vec3> temp_normals;
 
+    std::map<std::string, unsigned int> vertexHistory;
+    unsigned int uniqueVertexCount = 0;
+
     std::ifstream file(path);
     if (!file.is_open()) {
         std::cout << "ERREUR OBJ : Impossible d'ouvrir le fichier " << path << std::endl;
-        return vertexData;
+        return mesh;
     }
 
     std::string line;
@@ -37,40 +41,55 @@ std::vector<float> ObjLoader::load(const std::string& path) {
             iss >> normal.x >> normal.y >> normal.z;
             temp_normals.push_back(normal);
         } else if (type == "f") {
-            std::vector<std::vector<float>> faceVertices;
-            std::string vertexStr;
+            std::vector<unsigned int> faceIndices;
+            std::string vertexStrOriginal;
             
-            // Lecture points de la face
-            while (iss >> vertexStr) {
-                std::replace(vertexStr.begin(), vertexStr.end(), '/', ' ');
-                std::istringstream viss(vertexStr);
+            while (iss >> vertexStrOriginal) {
+                std::string key = vertexStrOriginal;
                 
-                unsigned int vIdx = 0, uvIdx = 0, nIdx = 0;
-                viss >> vIdx >> uvIdx >> nIdx;
+                // Si on a DÉJÀ vu ce point, on récupère juste son indice !
+                if (vertexHistory.find(key) != vertexHistory.end()) {
+                    faceIndices.push_back(vertexHistory[key]);
+                } else {
+                    // Si c'est un point INCONNU, on le découpe et on le rajoute
+                    std::string vertexStr = vertexStrOriginal;
+                    std::replace(vertexStr.begin(), vertexStr.end(), '/', ' ');
+                    std::istringstream viss(vertexStr);
+                    
+                    unsigned int vIdx = 0, uvIdx = 0, nIdx = 0;
+                    viss >> vIdx >> uvIdx >> nIdx;
 
-                glm::vec3 vertex = temp_vertices[vIdx - 1];
-                glm::vec2 uv = (uvIdx > 0 && uvIdx <= temp_uvs.size()) ? temp_uvs[uvIdx - 1] : glm::vec2(0.0f);
-                glm::vec3 normal = (nIdx > 0 && nIdx <= temp_normals.size()) ? temp_normals[nIdx - 1] : glm::vec3(0.0f);
+                    glm::vec3 vertex = temp_vertices[vIdx - 1];
+                    glm::vec2 uv = (uvIdx > 0 && uvIdx <= temp_uvs.size()) ? temp_uvs[uvIdx - 1] : glm::vec2(0.0f);
+                    glm::vec3 normal = (nIdx > 0 && nIdx <= temp_normals.size()) ? temp_normals[nIdx - 1] : glm::vec3(0.0f);
 
-                std::vector<float> vertexProps = {
-                    vertex.x, vertex.y, vertex.z,
-                    normal.x, normal.y, normal.z,
-                    uv.x, uv.y
-                };
-                faceVertices.push_back(vertexProps);
+                    mesh.vertices.push_back(vertex.x);
+                    mesh.vertices.push_back(vertex.y);
+                    mesh.vertices.push_back(vertex.z);
+                    mesh.vertices.push_back(normal.x);
+                    mesh.vertices.push_back(normal.y);
+                    mesh.vertices.push_back(normal.z);
+                    mesh.vertices.push_back(uv.x);
+                    mesh.vertices.push_back(uv.y);
+
+                    vertexHistory[key] = uniqueVertexCount;
+                    faceIndices.push_back(uniqueVertexCount);
+                    uniqueVertexCount++;
+                }
             }
 
-            // Au moins 3 points pour trianguler
-            if (faceVertices.size() >= 3) {
-                for (size_t i = 1; i < faceVertices.size() - 1; ++i) {
-                    vertexData.insert(vertexData.end(), faceVertices[0].begin(), faceVertices[0].end());
-                    vertexData.insert(vertexData.end(), faceVertices[i].begin(), faceVertices[i].end());
-                    vertexData.insert(vertexData.end(), faceVertices[i+1].begin(), faceVertices[i+1].end());
+            // On crée les triangles en utilisant uniquement les INIDICES
+            if (faceIndices.size() >= 3) {
+                for (size_t i = 1; i < faceIndices.size() - 1; ++i) {
+                    mesh.indices.push_back(faceIndices[0]);
+                    mesh.indices.push_back(faceIndices[i]);
+                    mesh.indices.push_back(faceIndices[i+1]);
                 }
             }
         }
     }
     
-    std::cout << "[SUCCES] Modele 3D charge : " << path << " (" << (vertexData.size() / 8) / 3 << " triangles)" << std::endl;
-    return vertexData;
+    std::cout << "[SUCCES EBO] " << path << " (Sommets uniques: " << uniqueVertexCount 
+              << " | Triangles: " << mesh.indices.size() / 3 << ")" << std::endl;
+    return mesh;
 }

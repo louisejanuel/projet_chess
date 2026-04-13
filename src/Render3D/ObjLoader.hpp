@@ -2,9 +2,12 @@
 #include <vector>
 #include <string>
 
+struct MeshData {
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+};
+
 class ObjLoader {
 public:
-    // Lit un fichier OBJ et retourne un tableau de floats prêt pour OpenGL
-    // Format de sortie : [px, py, pz, nx, ny, nz, u, v] pour chaque sommet
-    static std::vector<float> load(const std::string& path);
+    static MeshData load(const std::string& path);
 };

@@ -1,15 +1,16 @@
 #pragma once
 #include <vector>
+#include "ObjLoader.hpp"
 #include "OpenGL.hpp"
-
 
 class Model {
 public:
-    GLuint VAO, VBO;
-    int    vertexCount = 36; 
+    GLuint VAO, VBO, EBO;
+    int    vertexCount = 0;
+    int    indexCount  = 0;
 
     Model()
-        : VAO(0), VBO(0) {}
+        : VAO(0), VBO(0), EBO(0) {}
 
     ~Model()
     {
@@ -17,14 +18,17 @@ public:
             glDeleteVertexArrays(1, &VAO);
         if (VBO != 0)
             glDeleteBuffers(1, &VBO);
+        if (EBO != 0)
+            glDeleteBuffers(1, &EBO);
     }
-    // On interdit la copie pour éviter les fuites de mémoire OpenGL
+
     Model(const Model&)            = delete;
     Model& operator=(const Model&) = delete;
 
     void setupCube()
     {
         vertexCount = 36;
+        indexCount  = 0;
 
         float vertices[] = {
             // Face arrière
@@ -92,36 +96,45 @@ public:
         glBindVertexArray(0);
     }
 
-    void setupFromData(const std::vector<float>& data)
+    void setupFromData(const MeshData& mesh)
     {
-        // On calcule automatiquement le nombre de sommets (8 nombres par sommet)
-        vertexCount = data.size() / 8;
+        indexCount  = mesh.indices.size();
+        vertexCount = mesh.vertices.size() / 8;
 
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
+        glGenBuffers(1, &EBO);
 
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(float), mesh.vertices.data(), GL_STATIC_DRAW);
 
-        // Position (x, y, z)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(unsigned int), mesh.indices.data(), GL_STATIC_DRAW);
+
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
-        // Normales (nx, ny, nz)
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
-        // Texture (u, v)
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
 
-    void draw()
+    void draw() const
     {
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+
+        if (indexCount > 0)
+        {
+            glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+        }
+        else
+        {
+            glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+        }
+
         glBindVertexArray(0);
     }
 };

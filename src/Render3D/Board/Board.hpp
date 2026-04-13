@@ -23,8 +23,8 @@ public:
         caseVolume.setupCube();
 
         auto loadModel = [](Model& model, const std::string& path) {
-            std::vector<float> data = ObjLoader::load(path);
-            if (!data.empty())
+            MeshData data = ObjLoader::load(path);
+            if (!data.vertices.empty())
             {
                 model.setupFromData(data);
             }
