@@ -37,10 +37,10 @@ std::vector<float> ObjLoader::load(const std::string& path) {
             iss >> normal.x >> normal.y >> normal.z;
             temp_normals.push_back(normal);
         } else if (type == "f") {
-            
             std::vector<std::vector<float>> faceVertices;
             std::string vertexStr;
             
+            // Lecture points de la face
             while (iss >> vertexStr) {
                 std::replace(vertexStr.begin(), vertexStr.end(), '/', ' ');
                 std::istringstream viss(vertexStr);
@@ -60,11 +60,13 @@ std::vector<float> ObjLoader::load(const std::string& path) {
                 faceVertices.push_back(vertexProps);
             }
 
-            // Triangulation, si 3 points triangle,  si 4 points 2 triangles
-            for (size_t i = 1; i < faceVertices.size() - 1; ++i) {
-                vertexData.insert(vertexData.end(), faceVertices[0].begin(), faceVertices[0].end());
-                vertexData.insert(vertexData.end(), faceVertices[i].begin(), faceVertices[i].end());
-                vertexData.insert(vertexData.end(), faceVertices[i+1].begin(), faceVertices[i+1].end());
+            // Au moins 3 points pour trianguler
+            if (faceVertices.size() >= 3) {
+                for (size_t i = 1; i < faceVertices.size() - 1; ++i) {
+                    vertexData.insert(vertexData.end(), faceVertices[0].begin(), faceVertices[0].end());
+                    vertexData.insert(vertexData.end(), faceVertices[i].begin(), faceVertices[i].end());
+                    vertexData.insert(vertexData.end(), faceVertices[i+1].begin(), faceVertices[i+1].end());
+                }
             }
         }
     }

@@ -27,12 +27,12 @@ public:
             }
         };
 
-        loadModel(pawnModel, "src/Assets/models/pawn.obj");
-        loadModel(rookModel, "src/Assets/models/rook.obj");
-        loadModel(knightModel, "src/Assets/models/knight.obj");
-        loadModel(bishopModel, "src/Assets/models/bishop.obj");
-        loadModel(queenModel, "src/Assets/models/queen.obj");
-        loadModel(kingModel, "src/Assets/models/king.obj");
+        loadModel(pawnModel, "../../src/Assets/models/pawn.obj");
+        loadModel(rookModel, "../../src/Assets/models/rook.obj");
+        loadModel(knightModel, "../../src/Assets/models/knight.obj");
+        loadModel(bishopModel, "../../src/Assets/models/bishop.obj");
+        loadModel(queenModel, "../../src/Assets/models/queen.obj");
+        loadModel(kingModel, "../../src/Assets/models/king.obj");
     }
 
     void render(Shader& shader, const Chessboard& logicBoard) {
