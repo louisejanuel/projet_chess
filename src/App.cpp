@@ -1,6 +1,7 @@
 #include "App.hpp"
 #include "Game/GameClassic.hpp"
 #include "Game/GameChaos.hpp"
+#include "Render3D/Skybox.hpp" // <-- AJOUT DE LA SKYBOX ICI
 #include "quick_imgui/quick_imgui.hpp"
 #include <iostream>
 #include <fstream>
@@ -38,6 +39,10 @@ void App::run()
                 // --- 1. INITIALISATION 3D ---
                 m_chessBoard3D.init(); 
                 m_shader.emplace("../../src/Shaders/board.vs", "../../src/Shaders/board.fs"); 
+                
+                // --- NOUVEAU : INITIALISATION DE LA SKYBOX ---
+                m_skybox.init();
+                m_skyboxShader.emplace("../../src/Shaders/skybox.vs", "../../src/Shaders/skybox.fs");
                 
                 // --- 2. INITIALISATION POLICES 2D ---
                 io.Fonts->AddFontDefault();
@@ -95,14 +100,21 @@ void App::run()
                     // --- RENDU 3D OPENGL ---
                     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
                     glViewport(0, 0, viewWidth, viewHeight);
-                    glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+                    glClearColor(0.1f, 0.1f, 0.15f, 1.0f); // Couleur de sécurité si la skybox échoue
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                     glEnable(GL_DEPTH_TEST);
 
+                    // --- NOUVEAU : Calcul de la caméra (SORTI DU IF pour que la skybox l'utilise aussi) ---
+                    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 6.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)viewWidth / (float)viewHeight, 0.1f, 100.0f);
+
+                    // --- NOUVEAU : RENDU DE LA SKYBOX D'ABORD ---
+                    if (m_skyboxShader.has_value()) {
+                        m_skybox.render(*m_skyboxShader, view, projection);
+                    }
+
                     if (m_shader.has_value()) {
                         m_shader->use();
-                        glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 6.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)viewWidth / (float)viewHeight, 0.1f, 100.0f);
                         m_shader->setMat4("view", view);
                         m_shader->setMat4("projection", projection);
                         m_shader->setVec3("lightPos", glm::vec3(0.0f, 10.0f, 0.0f));
@@ -113,6 +125,7 @@ void App::run()
                     }
 
                     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                    glDisable(GL_DEPTH_TEST); // On désactive le test de profondeur pour ImGui
                     glClearColor(0.4f, 0.5f, 0.6f, 1.0f); 
                     glClear(GL_COLOR_BUFFER_BIT);
 
