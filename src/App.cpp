@@ -1,7 +1,7 @@
 #include "App.hpp"
 #include "Game/GameClassic.hpp"
 #include "Game/GameChaos.hpp"
-#include "Render3D/Skybox.hpp" // <-- AJOUT DE LA SKYBOX ICI
+#include "Render3D/Skybox.hpp"
 #include "quick_imgui/quick_imgui.hpp"
 #include <iostream>
 #include <fstream>
@@ -39,8 +39,6 @@ void App::run()
                 // --- 1. INITIALISATION 3D ---
                 m_chessBoard3D.init(); 
                 m_shader.emplace("../../src/Shaders/board.vs", "../../src/Shaders/board.fs"); 
-                
-                // --- NOUVEAU : INITIALISATION DE LA SKYBOX ---
                 m_skybox.init();
                 m_skyboxShader.emplace("../../src/Shaders/skybox.vs", "../../src/Shaders/skybox.fs");
                 
@@ -100,15 +98,15 @@ void App::run()
                     // --- RENDU 3D OPENGL ---
                     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
                     glViewport(0, 0, viewWidth, viewHeight);
-                    glClearColor(0.1f, 0.1f, 0.15f, 1.0f); // Couleur de sécurité si la skybox échoue
+                    glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                     glEnable(GL_DEPTH_TEST);
 
-                    // --- NOUVEAU : Calcul de la caméra (SORTI DU IF pour que la skybox l'utilise aussi) ---
+                    // --- Calcul de la caméra
                     glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 6.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
                     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)viewWidth / (float)viewHeight, 0.1f, 100.0f);
 
-                    // --- NOUVEAU : RENDU DE LA SKYBOX D'ABORD ---
+                    // --- RENDU SKYBOX ---
                     if (m_skyboxShader.has_value()) {
                         m_skybox.render(*m_skyboxShader, view, projection);
                     }
@@ -118,14 +116,15 @@ void App::run()
                         m_shader->setMat4("view", view);
                         m_shader->setMat4("projection", projection);
                         m_shader->setVec3("lightPos", glm::vec3(0.0f, 10.0f, 0.0f));
-                        // couleur de la chaîne de markov pour la lumière
+                        
+                        // --- couleur de la chaîne de markov pour la lumière ---
                         m_shader->setVec3("lightColor", m_ambiance.get_light_color());
                         
                         m_chessBoard3D.render(*m_shader, m_current_game->get_board());
                     }
 
                     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                    glDisable(GL_DEPTH_TEST); // On désactive le test de profondeur pour ImGui
+                    glDisable(GL_DEPTH_TEST);
                     glClearColor(0.4f, 0.5f, 0.6f, 1.0f); 
                     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -182,7 +181,7 @@ void App::run()
                         if (last != Type::None) {
                             ImGui::Text("Derniere promotion : ");
                             ImGui::SameLine();
-                           if (last == Type::Queen) {
+                            if (last == Type::Queen) {
                                 ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), "UNE REINE ! Tu en as de la chance toi");
                             } 
                             else if (last == Type::Rook) {
@@ -197,7 +196,7 @@ void App::run()
                         }
                     }
 
-                    // --- AFFICHAGE VICTOIRE ---                    
+                    // --- AFFICHAGE VICTOIRE ---                  
                     if (m_current_game->get_state() != GameState::Playing) {
                         ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
                         ImGui::SetWindowFontScale(1.5f);
