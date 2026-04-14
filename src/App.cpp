@@ -82,7 +82,7 @@ void App::run()
                     int targetWidth = std::max(1, (int)(work_size.x - left_panel_width));
                     int targetHeight = std::max(1, (int)work_size.y);
 
-                    // REDIMENSIONNEMENT DYNAMIQUE DU FRAMEBUFFER (Pour s'adapter à la fenêtre)
+                    // REDIMENSIONNEMENT DYNAMIQUE DU FRAMEBUFFER
                     if (targetWidth != viewWidth || targetHeight != viewHeight) {
                         viewWidth = targetWidth; 
                         viewHeight = targetHeight;
@@ -106,9 +106,9 @@ void App::run()
                         m_shader->setMat4("view", view);
                         m_shader->setMat4("projection", projection);
                         m_shader->setVec3("lightPos", glm::vec3(0.0f, 10.0f, 0.0f));
-                        m_shader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+                        // couleur de la chaîne de markov pour la lumière
+                        m_shader->setVec3("lightColor", m_ambiance.get_light_color());
                         
-                        // C'est ICI qu'on fait le lien avec ton plateau !
                         m_chessBoard3D.render(*m_shader, m_current_game->get_board());
                     }
 
@@ -126,7 +126,7 @@ void App::run()
                     // --- FENETRE 2D ---
                     ImGui::SetNextWindowPos(ImVec2(work_pos.x, work_pos.y), ImGuiCond_Always);
                     ImGui::SetNextWindowSize(ImVec2(left_panel_width, top_left_height), ImGuiCond_Always);
-                    m_render2D.render(*m_current_game);
+                    m_render2D.render(*m_current_game, m_ambiance);
                     
                     // --- FENETRE CONTROLES ---
                     ImGui::SetNextWindowPos(ImVec2(work_pos.x, work_pos.y + top_left_height), ImGuiCond_Always);
@@ -154,7 +154,37 @@ void App::run()
                         ImGui::End();
                         return;
                     }
-                    
+
+                    // --- AFFICHAGE MODE CHAOS (PERDRE POUR GAGNER) ---
+                    if (m_current_game->is_rules_inverted()) {
+                        ImGui::Spacing();
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.2f, 1.0f, 1.0f)); // Violet pétant
+                        ImGui::TextWrapped("LE CHAOS FRAPPE !!!\nLES REGLES SONT INVERSEES :\nPERDEZ VOTRE ROI POUR GAGNER !");
+                        ImGui::PopStyleColor();
+                    }
+
+                    // --- AFFICHAGE MODE CHAOS (PROMOTION ALEATOIRE) ---
+                    if (m_current_game->get_game_mode() == GameMode::Chaos) {
+                        Type last = m_current_game->get_last_promoted();
+                        if (last != Type::None) {
+                            ImGui::Text("Derniere promotion : ");
+                            ImGui::SameLine();
+                           if (last == Type::Queen) {
+                                ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), "UNE REINE ! Tu en as de la chance toi");
+                            } 
+                            else if (last == Type::Rook) {
+                                ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "Une tour");
+                            } 
+                            else if (last == Type::Bishop) {
+                                ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "Un fou");
+                            } 
+                            else if (last == Type::Knight) {
+                                ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "Un cavalier");
+                            }
+                        }
+                    }
+
+                    // --- AFFICHAGE VICTOIRE ---                    
                     if (m_current_game->get_state() != GameState::Playing) {
                         ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
                         ImGui::SetWindowFontScale(1.5f);

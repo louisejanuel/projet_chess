@@ -1,7 +1,9 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "../Game/Game.hpp" // On inclut Game au lieu de Chessboard !
+#include "../Game/Game.hpp"
+#include "../Game/GameChaos.hpp"
+#include "../Render3D/Ambiance.hpp"
 
 struct ImFont;
 
@@ -14,16 +16,15 @@ private:
     bool m_awaiting_promotion     = false;
     Move m_pending_promotion_move = {{0, 0}, {0, 0}, Type::None};
 
-    // Note : Toutes les fonctions prennent maintenant Game& au lieu de Chessboard&
-    void        handle_click(Game& game, int index);
+    void        handle_click(Game& game, int index, AmbianceMarkov& ambiance);
     bool        is_highlighted(int index) const;
-    void        draw_board(Game& game);
+    void        draw_board(Game& game, AmbianceMarkov& ambiance);
     std::string get_piece_label(Piece* p) const;
 
-    void draw_promotion_popup(Game& game);
+    void draw_promotion_popup(Game& game, AmbianceMarkov& ambiance);
 
 public:
     void set_font(ImFont* font) { m_chess_font = font; }
     void reset();
-    void render(Game& game); 
+    void render(Game& game, AmbianceMarkov& ambiance); 
 };

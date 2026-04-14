@@ -41,3 +41,10 @@ struct Move {
 
     Type promotion = Type::None;
 };
+
+
+// Helpers pour la chaîne de Markov (lumière qui change)
+double tirageUniforme();
+double tirageCauchy(double x0, double gamma);
+double tirageLaplace(double mu, double b);
+int tiragePoisson(double lambda);

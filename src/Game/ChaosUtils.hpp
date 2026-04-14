@@ -1,7 +1,13 @@
 #pragma once
 
-// Helper pour le mode Chaos (loi de Bernoulli)
+// Helper loi de Bernoulli
 bool tirageBernoulli(double p);
 
-// Helper pour le mode Chaos (loi binomiale)
+// Helper loi binomiale
 int tirageBinomial(int n, double p);
+
+// Helper loi géométrique
+int tirageGeometrique(double p);
+
+// Helper loi exponentielle
+double tirageExponentiel(double lambda);

@@ -11,30 +11,26 @@ void GameRender::reset()
     m_awaiting_promotion = false;
 }
 
-void GameRender::render(Game& game)
+void GameRender::render(Game& game, AmbianceMarkov& ambiance)
 {
     ImGui::Begin("ChessBoard", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
 
-    // Clic droit pour annuler la sélection
-    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-    {
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
         m_selected_index = -1;
         m_possible_moves.clear();
     }
 
-    draw_board(game);
+    draw_board(game, ambiance);
 
-    // affichage popup de promotion
-    if (m_awaiting_promotion)
-    {
+    if (m_awaiting_promotion) {
         ImGui::OpenPopup("Choix Promotion");
     }
-    draw_promotion_popup(game);
+    draw_promotion_popup(game, ambiance);
 
     ImGui::End();
 }
 
-void GameRender::draw_board(Game& game)
+void GameRender::draw_board(Game& game, AmbianceMarkov& ambiance)
 {
     // Adapter la taille dynamiquement au panneau carré
     ImVec2 avail          = ImGui::GetContentRegionAvail();
@@ -100,7 +96,7 @@ void GameRender::draw_board(Game& game)
 
             if (ImGui::Button(label.c_str(), ImVec2{size, size}))
             {
-                handle_click(game, index);
+                handle_click(game, index, ambiance);
             }
 
             ImGui::PopStyleVar();
@@ -116,7 +112,7 @@ void GameRender::draw_board(Game& game)
     }
 }
 
-void GameRender::handle_click(Game& game, int index)
+void GameRender::handle_click(Game& game, int index, AmbianceMarkov& ambiance)
 {
     if (game.get_state() != GameState::Playing)
         return;
@@ -129,21 +125,33 @@ void GameRender::handle_click(Game& game, int index)
         if (p != nullptr && (p->get_type() == Type::Pawn || p->get_type() == Type::BerolinaPawn))
         {
             int target_y = index / 8;
-            if (target_y == 0 || target_y == 7)
-            {
-                is_promotion = true;
-            }
+            if (target_y == 0 || target_y == 7) is_promotion = true;
         }
 
         if (is_promotion)
         {
-            m_awaiting_promotion     = true;
-            m_pending_promotion_move = {{m_selected_index % 8, m_selected_index / 8}, {index % 8, index / 8}, Type::None};
+            if (game.get_game_mode() == GameMode::Chaos)
+            {
+                // MODE CHAOS
+                if (game.play_move(m_selected_index, index)) {
+                    ambiance.transition();
+                }
+                m_selected_index = -1;
+                m_possible_moves.clear();
+            }
+            else
+            {
+                // MODE CLASSIQUE
+                m_awaiting_promotion     = true;
+                m_pending_promotion_move = {{m_selected_index % 8, m_selected_index / 8}, {index % 8, index / 8}, Type::None};
+            }
         }
         else
         {
-            // On utilise la méthode de Game qui va elle-même bouger la pièce et gérer la victoire/le tour
-            game.play_move(m_selected_index, index);
+            // MOUVEMENT NORMAL
+            if (game.play_move(m_selected_index, index)) {
+                ambiance.transition();
+            }
             m_selected_index = -1;
             m_possible_moves.clear();
         }
@@ -151,11 +159,9 @@ void GameRender::handle_click(Game& game, int index)
     }
 
     Piece* p = game.get_board().get_piece(index);
-    // Le joueur ne peut sélectionner sa pièce que si c'est bien son tour !
     if (p != nullptr && p->get_color() == game.get_current_turn())
     {
         m_selected_index = index;
-        // On donne le plateau pur à get_available_moves pour calculer les coups
         m_possible_moves = p->get_available_moves(game.get_board(), {index % 8, index / 8});
     }
     else
@@ -195,7 +201,7 @@ std::string GameRender::get_piece_label(Piece* p) const
     }
 }
 
-void GameRender::draw_promotion_popup(Game& game)
+void GameRender::draw_promotion_popup(Game& game, AmbianceMarkov& ambiance)
 {
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
@@ -208,7 +214,9 @@ void GameRender::draw_promotion_popup(Game& game)
         auto select_piece = [&](Type type, const char* label) {
             if (ImGui::Button(label, ImVec2(120, 0)))
             {
-                game.play_move(m_pending_promotion_move.start.to_index(), m_pending_promotion_move.end.to_index(), type);
+                if (game.play_move(m_pending_promotion_move.start.to_index(), m_pending_promotion_move.end.to_index(), type)) {
+                    ambiance.transition(); // <--- ET ENFIN ICI !
+                }
 
                 m_selected_index = -1;
                 m_possible_moves.clear();

@@ -15,6 +15,10 @@ public:
     virtual void setup() = 0; 
     virtual bool play_move(int fromIdx, int toIdx, Type promotion = Type::None);
     virtual int get_collapsing_square_idx() const { return -1; }
+    virtual bool is_rules_inverted() const { return false; } // pour loi géométrique
+
+    virtual GameMode get_game_mode() const { return GameMode::Classic; }
+    virtual Type get_last_promoted() const { return Type::None; }
     
     Chessboard& get_board() { return m_board; }
     Color get_current_turn() const { return m_current_turn; }

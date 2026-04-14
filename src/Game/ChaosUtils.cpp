@@ -1,11 +1,11 @@
 #include "ChaosUtils.hpp"
-#include <cstdlib> // Pour rand() et RAND_MAX
+#include <cstdlib>
+#include <cmath>
 
 bool tirageBernoulli(double p)
 {
-    // Génère un nombre aléatoire uniforme entre 0.0 et 1.0
-    double u = (double)rand() / RAND_MAX;
-    return (u < p); // Retourne true avec une probabilité p
+    double u = (double)rand() / RAND_MAX; // génère nombre aléatoire uniforme entre 0 et 1
+    return (u < p);
 }
 
 int tirageBinomial(int n, double p)
@@ -18,4 +18,17 @@ int tirageBinomial(int n, double p)
             succes++;
     }
     return succes;
+}
+
+int tirageGeometrique(double p)
+{
+    double u = (double)rand() / RAND_MAX;
+    if (u == 0.0) u = 0.00001; // éviter log(0)
+    return (int)ceil(log(u) / log(1.0 - p)); // formule de la transformée inverse
+}
+
+double tirageExponentiel(double lambda) {
+    double u = (double)rand() / RAND_MAX;
+    if (u == 0.0) u = 0.0001; // idem
+    return -log(u) / lambda;
 }
