@@ -122,10 +122,10 @@ void App::run()
                 m_shader->setMat4("projection", projection);
                 m_shader->setVec3("lightPos", glm::vec3(0.0f, 10.0f, 0.0f));
                 m_shader->setVec3("lightColor", m_ambiance.get_light_color());
+                m_shader->setVec3("mobileLightPos", m_mobileLightPos);
+                int isWhite = (m_current_game->get_current_turn() == Color::White) ? 1 : 0;
+                m_shader->setInt("isWhiteTurn", isWhite);
 
-                // ==========================================
-                // --- PREPARATION DES ETATS DU PLATEAU ---
-                // ==========================================
                 std::vector<int> boardStates(64, 0); // 0: Inactif, 1: Mouvement, 2: Sélectionné, 3: Survolé
                 int currentSelected = m_render2D.get_selected_index();
                 
@@ -241,6 +241,19 @@ void App::run()
                     m_lastSelectedPiece = -1;
                 }
             }
+
+            // --- CONTROLES DE LA LUMIERE MOBILE ---
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+            ImGui::Text("Deplacer la lumiere mobile (Mode Blanc) :");
+            
+            if (ImGui::Button("Devant", ImVec2(100, 30))) m_mobileLightPos.z -= 1.0f;
+            ImGui::SameLine();
+            if (ImGui::Button("Derriere", ImVec2(100, 30))) m_mobileLightPos.z += 1.0f;
+            
+            if (ImGui::Button("Gauche", ImVec2(100, 30))) m_mobileLightPos.x -= 1.0f;
+            ImGui::SameLine();
+            if (ImGui::Button("Droite", ImVec2(100, 30))) m_mobileLightPos.x += 1.0f;
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
 
             if (m_isPieceView) {
                 int currentSelected = m_render2D.get_selected_index();

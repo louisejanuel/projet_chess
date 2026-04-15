@@ -42,6 +42,8 @@ private:
     int   m_animTo = -1;
     float m_animProgress = 1.0f;
 
+    glm::vec3 m_mobileLightPos = glm::vec3(0.0f, 3.0f, 0.0f);
+
 public:
     void run();
     void start_game(GameMode mode);
