@@ -38,6 +38,10 @@ private:
     int  m_lastSelectedPiece = -1;  
     int m_hovered_idx_3d = -1;  
 
+    int   m_animFrom = -1;
+    int   m_animTo = -1;
+    float m_animProgress = 1.0f;
+
 public:
     void run();
     void start_game(GameMode mode);

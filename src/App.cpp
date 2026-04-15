@@ -88,6 +88,12 @@ void App::run()
             int targetWidth  = std::max(1, (int)(work_size.x - left_panel_width));
             int targetHeight = std::max(1, (int)work_size.y);
 
+            // --- GESTION DU TEMPS POUR L'ANIMATION ---
+            if (m_animProgress < 1.0f) {
+                m_animProgress += ImGui::GetIO().DeltaTime * 3.0f; // Modifie le 3.0f pour changer la vitesse
+                if (m_animProgress > 1.0f) m_animProgress = 1.0f;
+            }
+
             if (targetWidth != viewWidth || targetHeight != viewHeight) {
                 viewWidth  = targetWidth;
                 viewHeight = targetHeight;
@@ -137,8 +143,7 @@ void App::run()
                 }
 
                 // On envoie tout au plateau !
-                m_chessBoard3D.render(*m_shader, m_current_game->get_board(), boardStates);
-            }
+                m_chessBoard3D.render(*m_shader, m_current_game->get_board(), boardStates, m_animFrom, m_animTo, m_animProgress);            }
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glDisable(GL_DEPTH_TEST);
@@ -190,15 +195,23 @@ void App::run()
                     }
                 }
 
-                // ==========================================
-                // --- GESTION DU CLIC EN 3D ---
-                // ==========================================
+                
                 if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
                 {
                     ImGui::SetWindowFocus();
-                    // On envoie l'information du clic 3D au cerveau 2D !
                     if (m_hovered_idx_3d != -1) {
+                        // On mémorise l'état AVANT le clic
+                        Color turnBefore = m_current_game->get_current_turn();
+                        int selBefore = m_render2D.get_selected_index();
+
                         m_render2D.handle_click(*m_current_game, m_hovered_idx_3d, m_ambiance);
+
+                        // Si le tour a changé, un coup a été joué !
+                        if (turnBefore != m_current_game->get_current_turn() && selBefore != -1) {
+                            m_animFrom = selBefore;
+                            m_animTo = m_hovered_idx_3d;
+                            m_animProgress = 0.0f; // On démarre l'animation
+                        }
                     }
                 }
 
@@ -290,6 +303,6 @@ void App::run()
                 ImGui::SetWindowFontScale(1.0f);
             }
             ImGui::End();
-        } } }
+        } }}
     );
 }
