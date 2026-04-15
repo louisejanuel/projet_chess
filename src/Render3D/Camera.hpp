@@ -36,7 +36,7 @@ public:
     void setFirstPersonMode(glm::vec3 piecePosition)
     {
         mode       = CameraMode::FirstPerson;
-        fpPosition = piecePosition + glm::vec3(0.0f, 2.5f, 0.0f);
+        fpPosition = piecePosition + glm::vec3(0.0f, 4.0f, 0.0f);
 
         // Force à regarder le centre
         glm::vec3 direction = glm::normalize(glm::vec3(0.0f) - fpPosition);
@@ -48,7 +48,7 @@ public:
     {
         if (mode == CameraMode::FirstPerson)
         {
-            fpPosition = piecePosition + glm::vec3(0.0f, 2.5f, 0.0f);
+            fpPosition = piecePosition + glm::vec3(0.0f, 4.0f, 0.0f);
         }
     }
 

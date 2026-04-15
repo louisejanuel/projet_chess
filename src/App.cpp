@@ -262,9 +262,7 @@ void App::run()
                     int       z = currentSelected / 8;
                     glm::vec3 piecePos(x - 3.5f, 0.0f, z - 3.5f);
 
-                    if (m_lastSelectedPiece == -1) m_camera.setFirstPersonMode(piecePos);
-                    else m_camera.updateFirstPersonPosition(piecePos);
-
+                    m_camera.setFirstPersonMode(piecePos);
                     m_lastSelectedPiece = currentSelected;
                 }
             }
