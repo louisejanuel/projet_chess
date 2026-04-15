@@ -35,7 +35,8 @@ private:
 
     Camera m_camera;
     bool m_isPieceView = false;      
-    int  m_lastSelectedPiece = -1;   
+    int  m_lastSelectedPiece = -1;  
+    int m_hovered_idx_3d = -1;  
 
 public:
     void run();

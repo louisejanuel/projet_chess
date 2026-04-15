@@ -54,6 +54,23 @@ public:
 
     CameraMode getMode() const { return mode; }
 
+    glm::vec3 getPosition() const
+    {
+        if (mode == CameraMode::Trackball)
+        {
+            float radYaw   = glm::radians(trackballYaw);
+            float radPitch = glm::radians(trackballPitch);
+            float camX     = target.x + radius * cos(radPitch) * cos(radYaw);
+            float camY     = target.y + radius * sin(radPitch);
+            float camZ     = target.z + radius * cos(radPitch) * sin(radYaw);
+            return glm::vec3(camX, camY, camZ);
+        }
+        else
+        {
+            return fpPosition;
+        }
+    }
+
     glm::mat4 getViewMatrix() const
     {
         if (mode == CameraMode::Trackball)

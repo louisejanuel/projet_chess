@@ -4,6 +4,7 @@
 #include "../ObjLoader.hpp"
 #include "../OpenGL.hpp"
 #include "../Shader.hpp"
+#include <vector>
 
 class Board {
     Model caseVolume;
@@ -23,8 +24,7 @@ public:
 
         auto loadModel = [](Model& model, const std::string& path) {
             MeshData data = ObjLoader::load(path);
-            if (!data.vertices.empty())
-            {
+            if (!data.vertices.empty()) {
                 model.setupFromData(data);
             }
         };
@@ -37,23 +37,36 @@ public:
         loadModel(kingModel, "../../src/Assets/models/king.obj");
     }
 
-    void render(Shader& shader, const Chessboard& logicBoard)
+    // NOUVEAU : On passe le tableau des états (0=Normal, 1=Mouvement possible, 2=Sélectionné, 3=Survolé)
+    void render(Shader& shader, const Chessboard& logicBoard, const std::vector<int>& states)
     {
         // --- 1. DESSIN DU DAMIER ---
         for (int x = 0; x < 8; ++x)
         {
             for (int z = 0; z < 8; ++z)
             {
+                int index = z * 8 + x;
+                int state = states[index];
+
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, glm::vec3(x - 3.5f, 0.0f, z - 3.5f));
                 shader.setMat4("model", model);
                 shader.setInt("state", 0);
 
-                if ((x + z) % 2 == 0)
-                    shader.setVec3("baseColor", glm::vec3(0.9f, 0.8f, 0.7f));
-                else
-                    shader.setVec3("baseColor", glm::vec3(0.4f, 0.2f, 0.1f));
+                glm::vec3 baseColor;
+                if ((x + z) % 2 == 0) baseColor = glm::vec3(0.9f, 0.8f, 0.7f);
+                else baseColor = glm::vec3(0.4f, 0.2f, 0.1f);
 
+                // --- APPLICATION DES ÉTATS DEMANDÉS PAR LE PROF ---
+                if (state == 2) {
+                    baseColor = glm::vec3(0.4f, 0.8f, 0.4f); // Vert : Sélectionné
+                } else if (state == 1) {
+                    baseColor = glm::vec3(0.8f, 0.8f, 0.4f); // Jaune : Mouvement possible (Sélectionnable)
+                } else if (state == 3) {
+                    baseColor += glm::vec3(0.2f, 0.2f, 0.2f); // Surbrillance : Survolé par la souris
+                }
+
+                shader.setVec3("baseColor", baseColor);
                 caseVolume.draw();
             }
         }
@@ -88,14 +101,23 @@ public:
             {
                 Piece* piece = logicBoard.get_piece(i);
                 Type   type  = piece->get_type();
+                int    state = states[i];
 
                 int x = i % 8;
                 int z = i / 8;
 
-                if (piece->get_color() == Color::White)
-                    shader.setVec3("baseColor", glm::vec3(0.9f, 0.9f, 0.9f));
-                else
-                    shader.setVec3("baseColor", glm::vec3(0.2f, 0.2f, 0.2f));
+                glm::vec3 pieceColor;
+                if (piece->get_color() == Color::White) pieceColor = glm::vec3(0.9f, 0.9f, 0.9f);
+                else pieceColor = glm::vec3(0.2f, 0.2f, 0.2f);
+
+                // --- HALO VISUEL SUR LES PIÈCES ---
+                if (state == 2) {
+                    pieceColor += glm::vec3(0.0f, 0.4f, 0.0f); // Teinte verte si sélectionnée
+                } else if (state == 3) {
+                    pieceColor += glm::vec3(0.2f, 0.2f, 0.2f); // Surbrillance au survol
+                }
+
+                shader.setVec3("baseColor", pieceColor);
 
                 float localScale = 0.1f;
                 float rotationX  = -90.0f;
