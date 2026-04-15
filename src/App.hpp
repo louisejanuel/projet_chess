@@ -34,6 +34,8 @@ private:
     AmbianceMarkov m_ambiance;
 
     Camera m_camera;
+    bool m_isPieceView = false;      
+    int  m_lastSelectedPiece = -1;   
 
 public:
     void run();

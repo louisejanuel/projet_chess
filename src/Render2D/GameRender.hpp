@@ -11,7 +11,7 @@ class GameRender {
 private:
     int               m_selected_index = -1;
     std::vector<Move> m_possible_moves;
-    ImFont* m_chess_font = nullptr;
+    ImFont*           m_chess_font = nullptr;
 
     bool m_awaiting_promotion     = false;
     Move m_pending_promotion_move = {{0, 0}, {0, 0}, Type::None};
@@ -24,7 +24,8 @@ private:
     void draw_promotion_popup(Game& game, AmbianceMarkov& ambiance);
 
 public:
+    int  get_selected_index() const { return m_selected_index; }
     void set_font(ImFont* font) { m_chess_font = font; }
     void reset();
-    void render(Game& game, AmbianceMarkov& ambiance); 
+    void render(Game& game, AmbianceMarkov& ambiance);
 };
