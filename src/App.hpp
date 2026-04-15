@@ -10,6 +10,7 @@
 #include "Render3D/Shader.hpp"
 #include "Render3D/Ambiance.hpp"
 #include "Render3D/Skybox.hpp"
+#include "Render3D/Camera.hpp"
 
 
 enum class AppState { MainMenu,
@@ -31,6 +32,8 @@ private:
     GLuint fbo = 0, textureColorbuffer = 0, rbo = 0;
     int viewWidth = 800, viewHeight = 600;
     AmbianceMarkov m_ambiance;
+
+    Camera m_camera;
 
 public:
     void run();
