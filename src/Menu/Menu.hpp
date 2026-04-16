@@ -1,5 +1,5 @@
 #pragma once
-class App; // Forward declaration
+class App;
 
 class Menu {
 public:
