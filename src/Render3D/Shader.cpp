@@ -3,57 +3,57 @@
 #include <iostream>
 #include <sstream>
 
-
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
-    // Code source des shaders depuis les fichiers
-    std::string   vertexCode;
-    std::string   fragmentCode;
-    std::ifstream vShaderFile, fShaderFile;
+    std::string vertexCode;
+    std::string fragmentCode;
+    std::ifstream vShaderFile;
+    std::ifstream fShaderFile;
 
+    // Ouverture des fichiers sources
     vShaderFile.open(vertexPath);
     fShaderFile.open(fragmentPath);
-    vShaderFile.open(vertexPath);
-    fShaderFile.open(fragmentPath);
 
-    if (!vShaderFile.is_open() || !fShaderFile.is_open())
-    {
-        std::cout << "ERREUR CRITIQUE : Impossible de trouver les shaders aux chemins :" << std::endl;
-        std::cout << vertexPath << " et " << fragmentPath << std::endl;
-        std::cout << "Verifie les chemins dans ton main.cpp !" << std::endl;
+    // Vérification de la lecture
+    if (!vShaderFile.is_open() || !fShaderFile.is_open()) {
+        std::cout << "ERREUR CRITIQUE : Impossible de trouver les shaders." << std::endl;
+        return; // Stoppe l'exécution pour éviter un plantage
     }
 
-    std::stringstream vShaderStream, fShaderStream;
+    std::stringstream vShaderStream;
+    std::stringstream fShaderStream;
+    
+    // Extraction du texte
     vShaderStream << vShaderFile.rdbuf();
     fShaderStream << fShaderFile.rdbuf();
+    
+    // Fermeture des fichiers
     vShaderFile.close();
     fShaderFile.close();
-    vertexCode   = vShaderStream.str();
-    fragmentCode = fShaderStream.str();
 
+    // Conversion en chaînes de caractères
+    vertexCode = vShaderStream.str();
+    fragmentCode = fShaderStream.str();
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
 
-    // Compiler les shaders
-    GLuint vertex, fragment;
-    int    success;
-    char   infoLog[512];
-
-    vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vShaderCode, NULL);
+    // Compilation du Vertex Shader
+    GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex, 1, &vShaderCode, nullptr);
     glCompileShader(vertex);
 
-    fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fShaderCode, NULL);
+    // Compilation du Fragment Shader
+    GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment, 1, &fShaderCode, nullptr);
     glCompileShader(fragment);
 
-    // Créer le programme Shader
+    // Création et liaison du programme principal
     ID = glCreateProgram();
     glAttachShader(ID, vertex);
     glAttachShader(ID, fragment);
     glLinkProgram(ID);
 
-    // Nettoyage
+    // Nettoyage des shaders intermédiaires inutiles
     glDeleteShader(vertex);
     glDeleteShader(fragment);
 }

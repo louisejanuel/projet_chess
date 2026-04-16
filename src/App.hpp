@@ -5,7 +5,7 @@
 #include "Game/Utils.hpp"
 #include "Menu/Menu.hpp"
 #include "Render2D/GameRender.hpp"
-#include "Render3D/Board/Board.hpp"
+#include "Render3D/Board.hpp"
 #include "Render3D/OpenGL.hpp"
 #include "Render3D/Shader.hpp"
 #include "Render3D/Ambiance.hpp"
