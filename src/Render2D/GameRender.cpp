@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <string>
 
-// Permet de tout désélectionner quand on relance une partie
 void GameRender::reset()
 {
     m_selected_index = -1;
@@ -11,10 +10,12 @@ void GameRender::reset()
     m_awaiting_promotion = false;
 }
 
+// main render loop for the 2D chessboard
 void GameRender::render(Game& game, AmbianceMarkov& ambiance)
 {
     ImGui::Begin("ChessBoard", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
 
+    // cancel selection on right-click
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
         m_selected_index = -1;
         m_possible_moves.clear();
@@ -22,6 +23,7 @@ void GameRender::render(Game& game, AmbianceMarkov& ambiance)
 
     draw_board(game, ambiance);
 
+    // display promotion popup if needed
     if (m_awaiting_promotion) {
         ImGui::OpenPopup("Choix Promotion");
     }
@@ -30,16 +32,16 @@ void GameRender::render(Game& game, AmbianceMarkov& ambiance)
     ImGui::End();
 }
 
+// draw the 8x8 grid and the pieces
 void GameRender::draw_board(Game& game, AmbianceMarkov& ambiance)
 {
-    // Adapter la taille dynamiquement au panneau carré
+    // dynamically scale cell size to fit the panel
     ImVec2 avail          = ImGui::GetContentRegionAvail();
     float  max_board_size = std::min(avail.x, avail.y);
     float  spacing        = ImGui::GetStyle().ItemSpacing.x;
     float  padding        = ImGui::GetStyle().WindowPadding.x;
     float  size           = std::max(10.0f, (max_board_size - spacing * 7.0f - padding * 2.0f) / 8.0f);
 
-    // On passe par le jeu pour récupérer le plateau
     Piece* selected_piece = game.get_board().get_piece(m_selected_index);
 
     for (int y = 0; y < 8; y++)
@@ -48,50 +50,48 @@ void GameRender::draw_board(Game& game, AmbianceMarkov& ambiance)
         {
             int index = y * 8 + x;
 
-            // --- 1. COULEURS DE FOND ---
+            // background colors
             bool   is_dark  = (x + y) % 2 != 0;
             ImVec4 bg_color = is_dark ? ImVec4{0.45f, 0.25f, 0.15f, 1.0f} : ImVec4{0.9f, 0.8f, 0.65f, 1.0f};
 
-            // NOUVEAU : On colorie la case piégée pour qu'elle soit visible en mode Chaos !
             if (index == game.get_collapsing_square_idx())
             {
-                bg_color = ImVec4{0.4f, 0.1f, 0.6f, 1.0f}; // Un beau violet "Chaos"
+                bg_color = ImVec4{0.4f, 0.1f, 0.6f, 1.0f};
             }
 
             if (is_highlighted(index))
             {
-                bg_color = ImVec4{0.2f, 0.8f, 0.2f, 1.0f}; // Vert (mouvement possible)
+                bg_color = ImVec4{0.2f, 0.8f, 0.2f, 1.0f};
                 Piece* target_piece = game.get_board().get_piece(index);
                 if (selected_piece != nullptr && target_piece != nullptr && selected_piece->get_color() != target_piece->get_color())
                 {
-                    bg_color = ImVec4{0.8f, 0.2f, 0.2f, 1.0f}; // Rouge (capture)
+                    bg_color = ImVec4{0.8f, 0.2f, 0.2f, 1.0f};
                 }
             }
 
             if (index == m_selected_index)
             {
-                bg_color = ImVec4{0.2f, 0.5f, 1.0f, 1.0f}; // Bleu (sélection)
+                bg_color = ImVec4{0.2f, 0.5f, 1.0f, 1.0f};
             }
 
             ImGui::PushStyleColor(ImGuiCol_Button, bg_color);
             ImGui::PushID(index);
 
-            // --- 2. PIÈCE ET COULEUR DU TEXTE ---
+            // piece and texte color
             Piece* p     = game.get_board().get_piece(index);
             std::string label = get_piece_label(p);
 
-            ImVec4 text_color = ImVec4{0.0f, 0.0f, 0.0f, 1.0f}; // Noir par défaut
+            ImVec4 text_color = ImVec4{0.0f, 0.0f, 0.0f, 1.0f};
             if (p != nullptr && p->get_color() == Color::White)
             {
-                text_color = ImVec4{1.0f, 1.0f, 1.0f, 1.0f}; // Blanc
+                text_color = ImVec4{1.0f, 1.0f, 1.0f, 1.0f};
             }
 
             ImGui::PushStyleColor(ImGuiCol_Text, text_color);
 
-            // --- 3. AFFICHAGE DU BOUTON ---
+            // button display
             if (m_chess_font != nullptr) ImGui::PushFont(m_chess_font);
 
-            // Enlever le padding interne du bouton pour que la lettre soit bien centrée
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 
             if (ImGui::Button(label.c_str(), ImVec2{size, size}))
@@ -103,15 +103,16 @@ void GameRender::draw_board(Game& game, AmbianceMarkov& ambiance)
 
             if (m_chess_font != nullptr) ImGui::PopFont();
 
-            ImGui::PopStyleColor(2); // Dépile Button_Bg et Text
+            ImGui::PopStyleColor(2);
             ImGui::PopID();
 
-            // --- 4. MISE EN PAGE ---
+            // layout
             if (x < 7) ImGui::SameLine();
         }
     }
 }
 
+// handle player interactions with the board
 void GameRender::handle_click(Game& game, int index, AmbianceMarkov& ambiance)
 {
     if (game.get_state() != GameState::Playing)
@@ -132,7 +133,7 @@ void GameRender::handle_click(Game& game, int index, AmbianceMarkov& ambiance)
         {
             if (game.get_game_mode() == GameMode::Chaos)
             {
-                // MODE CHAOS
+                //chaos
                 if (game.play_move(m_selected_index, index)) {
                     ambiance.transition();
                 }
@@ -141,14 +142,13 @@ void GameRender::handle_click(Game& game, int index, AmbianceMarkov& ambiance)
             }
             else
             {
-                // MODE CLASSIQUE
+                //classic
                 m_awaiting_promotion     = true;
                 m_pending_promotion_move = {{m_selected_index % 8, m_selected_index / 8}, {index % 8, index / 8}, Type::None};
             }
         }
         else
         {
-            // MOUVEMENT NORMAL
             if (game.play_move(m_selected_index, index)) {
                 ambiance.transition();
             }
@@ -171,6 +171,7 @@ void GameRender::handle_click(Game& game, int index, AmbianceMarkov& ambiance)
     }
 }
 
+// check if a specific cell is a valid destination for the selected piece
 bool GameRender::is_highlighted(int index) const
 {
     for (const Move& m : m_possible_moves)
@@ -183,6 +184,7 @@ bool GameRender::is_highlighted(int index) const
     return false;
 }
 
+// get the unicode character corresponding to the piece type
 std::string GameRender::get_piece_label(Piece* p) const
 {
     if (p == nullptr)
@@ -191,7 +193,7 @@ std::string GameRender::get_piece_label(Piece* p) const
     switch (p->get_type())
     {
         case Type::Pawn:         return "♟";
-        case Type::BerolinaPawn: return "♟"; // On affiche le même symbole pour le pion muté
+        case Type::BerolinaPawn: return "♟";
         case Type::Rook:         return "♜";
         case Type::Knight:       return "♞";
         case Type::Bishop:       return "♝";
@@ -215,7 +217,7 @@ void GameRender::draw_promotion_popup(Game& game, AmbianceMarkov& ambiance)
             if (ImGui::Button(label, ImVec2(120, 0)))
             {
                 if (game.play_move(m_pending_promotion_move.start.to_index(), m_pending_promotion_move.end.to_index(), type)) {
-                    ambiance.transition(); // <--- ET ENFIN ICI !
+                    ambiance.transition();
                 }
 
                 m_selected_index = -1;

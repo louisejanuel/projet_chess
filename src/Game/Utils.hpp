@@ -36,14 +36,11 @@ struct Move {
     Position start;
     Position end;
 
-    // bool is_capture = false;
-    // bool is_castling = false;
-
     Type promotion = Type::None;
 };
 
 
-// Helpers pour la chaîne de Markov (lumière qui change)
+// helpers pour la chaîne de Markov (lumière qui change de couleur pendant le tour des noirs)
 double tirageUniforme();
 double tirageCauchy(double x0, double gamma);
 double tirageLaplace(double mu, double b);

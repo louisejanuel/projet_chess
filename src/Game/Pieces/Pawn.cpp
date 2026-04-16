@@ -4,15 +4,13 @@
 std::vector<Move> Pawn::get_available_moves(const Chessboard& chessboard, Position currentPos) const {
     std::vector<Move> moves;
     
-    int direction = (m_color == Color::White) ? -1 : 1; //
+    int direction = (m_color == Color::White) ? -1 : 1;
 
-    //move forward one square
     Position nextPos = { currentPos.x, currentPos.y + direction };
     
     if (nextPos.is_valid() && chessboard.is_empty(nextPos.to_index())) {
         moves.push_back({currentPos, nextPos});
 
-        //move forward two squares if first move
         if (!m_has_moved) { //
             Position doublePos = { currentPos.x, currentPos.y + (2 * direction) };
             if (doublePos.is_valid() && chessboard.is_empty(doublePos.to_index())) {
@@ -21,7 +19,6 @@ std::vector<Move> Pawn::get_available_moves(const Chessboard& chessboard, Positi
         }
     }
 
-    //eat diagonally left
     Position captureLeft = { currentPos.x - 1, currentPos.y + direction };
     if (captureLeft.is_valid()) {
         Piece* target = chessboard.get_piece(captureLeft.to_index());
@@ -30,7 +27,6 @@ std::vector<Move> Pawn::get_available_moves(const Chessboard& chessboard, Positi
         }
     }
 
-    //eat diagonally right
     Position captureRight = { currentPos.x + 1, currentPos.y + direction };
     if (captureRight.is_valid()) {
         Piece* target = chessboard.get_piece(captureRight.to_index());

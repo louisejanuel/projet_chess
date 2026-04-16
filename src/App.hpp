@@ -52,6 +52,9 @@ private:
     int   m_animTo = -1;
     float m_animProgress = 1.0f;
 
+    // --- Mode Chaos ---
+    bool m_show_chaos_rules = false;
+
 public:
     void run();
     void start_game(GameMode mode);

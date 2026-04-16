@@ -14,8 +14,10 @@ void App::start_game(GameMode mode)
 {
     if (mode == GameMode::Classic) {
         m_current_game = std::make_unique<GameClassic>();
+        m_show_chaos_rules = false;
     } else {
         m_current_game = std::make_unique<GameChaos>();
+        m_show_chaos_rules = true; 
     }
 
     m_current_game->setup();
@@ -332,7 +334,39 @@ void App::run()
                     else ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "VICTOIRE : Les noirs ont gagne !");
                     ImGui::SetWindowFontScale(1.0f);
                 }
-                
+                    
+                // pop up règles du mode Chaos
+                if (m_show_chaos_rules) {
+                    ImGui::OpenPopup("Regles du Mode Chaos");
+                }
+
+                ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+                ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+                if (ImGui::BeginPopupModal("Regles du Mode Chaos", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) 
+                {
+                    ImGui::Text("Bienvenue dans le Mode Chaos ! Les lois des mathematiques ont corrompu le plateau :");
+                    ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+
+                    ImGui::BulletText("1. Certains pions se sont transformes en Pions de Berolina,\n   ils avancent en diagonale et capturent tout droit !.");
+                    ImGui::Spacing();
+                    ImGui::BulletText("2. La case violette est instable. Si vous marchez dessus,\n   votre piece a 75%% de chances d'etre detruite.");
+                    ImGui::Spacing();
+                    ImGui::BulletText("3. Oubliez le choix. La promotion des pions\n   est automatique. Esperez une Reine, attendez-vous a un Cavalier.");
+                    ImGui::Spacing();
+                    ImGui::BulletText("4. Restez sur vos gardes... A n'importe quel moment de la partie,\n   les regles de victoire peuvent s'inverser (Perdez votre roi pour gagner).");
+                        
+                    ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+
+                    // bouton
+                    ImGui::SetCursorPosX((ImGui::GetWindowSize().x - 120) * 0.5f);
+                    if (ImGui::Button("C'est parti !", ImVec2(120, 40))) {
+                        m_show_chaos_rules = false;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndPopup();
+                }
+
                 ImGui::End();
             }
         }}

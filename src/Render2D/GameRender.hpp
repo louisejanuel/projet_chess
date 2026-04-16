@@ -25,11 +25,10 @@ public:
     void set_font(ImFont* font) { m_chess_font = font; }
     void reset();
     void render(Game& game, AmbianceMarkov& ambiance); 
-    bool        is_highlighted(int index) const;
+    bool is_highlighted(int index) const;
 
     void handle_click(Game& game, int index, AmbianceMarkov& ambiance);
     
-    // --- AJOUTÉ POUR L'AFFICHAGE VISUEL 3D PLUS TARD ---
     int get_selected_index() const { return m_selected_index; }
     const std::vector<Move>& get_possible_moves() const { return m_possible_moves; }
 };
