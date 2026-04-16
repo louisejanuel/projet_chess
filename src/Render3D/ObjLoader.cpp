@@ -112,8 +112,8 @@ MeshData ObjLoader::load(const std::string& path) {
         }
     }
     
-    std::cout << "[SUCCES EBO] " << path << " (Sommets uniques: " << uniqueVertexCount 
-              << " | Triangles: " << mesh.indices.size() / 3 << ")" << std::endl;
+    // std::cout << "[SUCCES EBO] " << path << " (Sommets uniques: " << uniqueVertexCount 
+    //           << " | Triangles: " << mesh.indices.size() / 3 << ")" << std::endl;
               
     return mesh;
 }
