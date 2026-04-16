@@ -1,13 +1,13 @@
 #pragma once
 
-// Helper loi de Bernoulli
+// helper loi de Bernoulli
 bool tirageBernoulli(double p);
 
-// Helper loi binomiale
+// helper loi binomiale
 int tirageBinomial(int n, double p);
 
-// Helper loi géométrique
+// helper loi géométrique
 int tirageGeometrique(double p);
 
-// Helper loi exponentielle
+// helper loi exponentielle
 double tirageExponentiel(double lambda);

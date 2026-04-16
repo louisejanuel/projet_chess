@@ -15,7 +15,7 @@ double tirageCauchy(double x0, double gamma) {
 
 double tirageLaplace(double mu, double b) {
     double u = tirageUniforme();
-    // Formule d'inversion pour Laplace
+    // formule d'inversion
     if (u < 0.5) {
         return mu + b * log(2.0 * u);
     } else {

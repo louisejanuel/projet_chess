@@ -8,7 +8,7 @@ std::vector<Move> BerolinaPawn::get_available_moves(const Chessboard& chessboard
     std::vector<Move> moves;
     int               dy = (this->m_color == Color::White) ? -1 : 1;
 
-    // 1. Déplacement en diagonale (sans capture)
+    // Déplacement en diagonale (sans capture)
     Position diagLeft = {.x=currentPos.x - 1, .y=currentPos.y + dy};
     if (diagLeft.is_valid() && chessboard.is_empty(diagLeft.to_index()))
     {
@@ -21,7 +21,7 @@ std::vector<Move> BerolinaPawn::get_available_moves(const Chessboard& chessboard
         moves.push_back({.start=currentPos, .end=diagRight});
     }
 
-    // 2. Capture tout droit
+    // Capture tout droit
     Position straight = {.x=currentPos.x, .y=currentPos.y + dy};
     if (straight.is_valid() && !chessboard.is_empty(straight.to_index()))
     {

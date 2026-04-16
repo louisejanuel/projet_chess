@@ -8,6 +8,7 @@
 
 void Game::setup_classic_pieces() 
 {
+    // pieces
     for (int i = 0; i < 8; ++i) m_board.set_piece(8 + i, std::make_unique<Pawn>(Color::Black));
     for (int i = 0; i < 8; ++i) m_board.set_piece(48 + i, std::make_unique<Pawn>(Color::White));
 
@@ -37,9 +38,11 @@ bool Game::play_move(int fromIdx, int toIdx, Type promotion)
     if (fromIdx < 0 || fromIdx >= 64 || toIdx < 0 || toIdx >= 64) return false;
     if (m_board.is_empty(fromIdx)) return false;
 
+    // ensure the selected piece belongs to the current player
     Piece* p = m_board.get_piece(fromIdx);
     if (p->get_color() != m_current_turn) return false;
 
+    // victory condition
     if (!m_board.is_empty(toIdx)) {
         Piece* target = m_board.get_piece(toIdx);
         if (target->get_type() == Type::King) {
@@ -47,6 +50,7 @@ bool Game::play_move(int fromIdx, int toIdx, Type promotion)
         }
     }
 
+    // apply the move and swap turns
     m_board.move_piece_basic(fromIdx, toIdx, promotion);
     m_current_turn = (m_current_turn == Color::White) ? Color::Black : Color::White;
 

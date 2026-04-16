@@ -4,6 +4,7 @@
 #include "Pieces/Bishop.hpp"
 #include "Pieces/Knight.hpp"
 
+// movements, captures, pawn promotions
 void Chessboard::move_piece_basic(int fromIdx, int toIdx, Type promotion) 
 {
     m_pieces[toIdx] = std::move(m_pieces[fromIdx]);

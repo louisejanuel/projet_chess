@@ -29,6 +29,6 @@ int tirageGeometrique(double p)
 
 double tirageExponentiel(double lambda) {
     double u = (double)rand() / RAND_MAX;
-    if (u == 0.0) u = 0.0001; // idem
+    if (u == 0.0) u = 0.0001;
     return -log(u) / lambda;
 }
